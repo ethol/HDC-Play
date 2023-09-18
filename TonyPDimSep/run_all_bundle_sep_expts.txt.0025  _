@@ -1,0 +1,149 @@
+# bundle separation non-linear dimensionality scaling experiments
+# all done with base R
+
+> source('bundle_sep_expt.R')
+
+> png(file='bundle_sep_expt1.png', height=800, width=800, pointsize=24)
+> par(mfrow=c(2,2), cex=0.6, mgp=c(1.5,0.5,0), mar=c(2.5,2.5,4.5,0.5))
+> for (n in c(32,64,128,256)) print(bundle_sep_expt(n=n, plot_=1, layout='n'))
+$param
+       n        M        K n_trials   n_expt
+      32     1000        4     1000     1000
+
+$res
+               u        sd           z
+neg 0.0003422886 0.1765690 0.001938555
+pos 0.4974103867 0.1219829 4.077706006
+sep 0.4970680981 0.2146076 2.316171557
+
+$opt_decision
+    threshold p_wrong_decision p_wrong_expt n_expts n_decisions  n_FP n_FN         p_FP   p_FN
+opt 0.5448221         0.003059        0.992    1000       1e+06   529 2530 0.0005311245 0.6325
+mid 0.2488763         0.080925        1.000    1000       1e+06 80797  128 0.0811214859 0.0320
+
+$param
+       n        M        K n_trials   n_expt
+      64     1000        4     1000     1000
+
+$res
+               u         sd            z
+neg -0.000804859 0.12498059 -0.006439872
+pos  0.497555129 0.08739478  5.693190383
+sep  0.498359988 0.15250572  3.267811738
+
+$opt_decision
+    threshold p_wrong_decision p_wrong_expt n_expts n_decisions  n_FP n_FN         p_FP    p_FN
+opt 0.4186788         0.000932        0.645    1000       1e+06   237  695 0.0002379518 0.17375
+mid 0.2483751         0.022482        1.000    1000       1e+06 22456   26 0.0225461847 0.00650
+
+$param
+       n        M        K n_trials   n_expt
+     128     1000        4     1000     1000
+
+$res
+               u         sd           z
+neg 0.0005797229 0.08846668 0.006553008
+pos 0.4996955335 0.06214458 8.040854178
+sep 0.4991158106 0.10811246 4.616635528
+
+$opt_decision
+    threshold p_wrong_decision p_wrong_expt n_expts n_decisions n_FP n_FN         p_FP    p_FN
+opt 0.3494653         0.000078        0.075    1000       1e+06   27   51 2.710843e-05 0.01275
+mid 0.2501376         0.002225        0.884    1000       1e+06 2224    1 2.232932e-03 0.00025
+
+$param
+       n        M        K n_trials   n_expt
+     256     1000        4     1000     1000
+
+$res
+              u         sd            z
+neg 0.000420639 0.06228010  0.006753988
+pos 0.498923592 0.04310101 11.575682064
+sep 0.498502953 0.07573974  6.581788869
+
+$opt_decision
+    threshold p_wrong_decision p_wrong_expt n_expts n_decisions n_FP n_FN        p_FP    p_FN
+opt 0.3128712          1.0e-06        0.001    1000       1e+06    0    1 0.00000e+00 0.00025
+mid 0.2496721          2.5e-05        0.025    1000       1e+06   25    0 2.51004e-05 0.00000
+
+> dev.off()
+>
+> png(file='bundle_sep_lin_dimex_expt1.png', height=600, width=400, pointsize=24)
+> par(mfrow=c(2,1), cex=0.6, mgp=c(1.5,0.5,0), mar=c(2.5,2.5,4.5,0.5))
+> bundle_sep_lin_dimex_expt(ns=32, n=128, plot_=1:2, layout='n')
+$param
+       n        M        K n_trials       ns   n_expt
+     128     1000        4     1000       32     1000
+
+$res
+                u        sd            z
+neg -0.0005470913 0.1769452 -0.003091869
+pos  0.4987232308 0.1225125  4.070795976
+sep  0.4992703221 0.2152183  2.319832338
+
+$opt_decision
+    threshold p_wrong_decision p_wrong_expt n_expts n_decisions  n_FP n_FN         p_FP    p_FN
+opt 0.5504491         0.003037        0.992    1000       1e+06   481 2556 0.0004829317 0.63900
+mid 0.2490881         0.080301        1.000    1000       1e+06 80184  117 0.0805060241 0.02925
+
+> dev.off()
+>
+> png(file='bundle_sep_nonlin_dimex1_expt1.png', height=600, width=400, pointsize=24)
+> par(mfrow=c(2,1), cex=0.6, mgp=c(1.5,0.5,0), mar=c(2.5,2.5,4.5,0.5))
+> bundle_sep_nonlin_dimex1_expt(ns=32, n=128, order=2, plot_=1:2, layout='n')
+$param
+       n        M        K n_trials       ns   n_expt    order
+     128     1000        4     1000       32     1000        2
+
+$res
+            u         sd         z
+neg 0.0764975 0.09061659 0.8441887
+pos 0.5282685 0.06095185 8.6669795
+sep 0.4517710 0.10920849 4.1367750
+
+$opt_decision
+    threshold p_wrong_decision p_wrong_expt n_expts n_decisions n_FP n_FN         p_FP    p_FN
+opt 0.4146005         0.000282        0.251    1000       1e+06  153  129 0.0001536145 0.03225
+mid 0.3023830         0.007346        0.994    1000       1e+06 7343    3 0.0073724900 0.00075
+
+> dev.off()
+>
+> png(file='bundle_sep_nonlin_dimex2_expt1.png', height=600, width=400, pointsize=24)
+> par(mfrow=c(2,1), cex=0.6, mgp=c(1.5,0.5,0), mar=c(2.5,2.5,4.5,0.5))
+> bundle_sep_nonlin_dimex2_expt(ns=32, n=128, order=3, J=12, plot_=1:2, layout='n')
+$param
+       n        M        K n_trials       ns   n_expt    order        J
+     128     1000        4     1000       32     1000        3       12
+
+$res
+                u         sd             z
+neg -2.445225e-05 0.09202700 -0.0002657074
+pos  4.976980e-01 0.06394665  7.7830192789
+sep  4.977225e-01 0.11206313  4.4414475675
+
+$opt_decision
+    threshold p_wrong_decision p_wrong_expt n_expts n_decisions n_FP n_FN         p_FP   p_FN
+opt 0.3545170         0.000119        0.116    1000       1e+06   43   76 4.317269e-05 0.0190
+mid 0.2488368         0.003298        0.946    1000       1e+06 3296    2 3.309237e-03 0.0005
+
+> dev.off()
+>
+> png(file='bundle_sep_nonlin_dimex3_expt1.png', height=600, width=400, pointsize=24)
+> par(mfrow=c(2,1), cex=0.6, mgp=c(1.5,0.5,0), mar=c(2.5,2.5,4.5,0.5))
+> bundle_sep_nonlin_dimex3_expt(ns=32, n=128, order=3, J=12, dxa=0.6, plot_=1:2, layout='n')
+$param
+       n        M        K n_trials       ns   n_expt    order        J      dxa
+   128.0   1000.0      4.0   1000.0     32.0   1000.0      3.0     12.0      0.6
+
+$res
+                u         sd            z
+neg -0.0004301413 0.10728699 -0.004009259
+pos  0.4995325823 0.07529666  6.634193018
+sep  0.4999627237 0.13107282  3.814388950
+
+$opt_decision
+    threshold p_wrong_decision p_wrong_expt n_expts n_decisions n_FP n_FN         p_FP   p_FN
+opt 0.3849164         0.000407        0.356    1000       1e+06  137  270 0.0001375502 0.0675
+mid 0.2495512         0.009654        0.999    1000       1e+06 9644   10 0.0096827309 0.0025
+
+>
