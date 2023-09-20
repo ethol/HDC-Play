@@ -1,5 +1,6 @@
 import numpy as np
 from scipy import spatial
+from scipy.stats import pearsonr, spearmanr
 import seaborn as sns
 from matplotlib import pyplot as plt
 import cmath
@@ -12,12 +13,12 @@ def gaussian_decay(x, sigma):
 
 
 def complex_cosine_similarity(u, v):
-    # Compute the dot product of u and v
-    dot_product = sum(u_i * v_i.conjugate() for u_i, v_i in zip(u, v))
+    # Compute the dot product of u and v using numpy's dot function
+    dot_product = np.dot(u, np.conjugate(v))
 
-    # Calculate the magnitudes of u and v
-    magnitude_u = cmath.sqrt(sum(abs(u_i) ** 2 for u_i in u))
-    magnitude_v = cmath.sqrt(sum(abs(v_i) ** 2 for v_i in v))
+    # Calculate the magnitudes of u and v using numpy's linalg.norm function
+    magnitude_u = np.linalg.norm(u)
+    magnitude_v = np.linalg.norm(v)
 
     # Calculate the cosine similarity
     if magnitude_u != 0 and magnitude_v != 0:
@@ -27,6 +28,7 @@ def complex_cosine_similarity(u, v):
 
     return similarity
 
+
 def exp(D, s, t):
     # Generate a random vector in the complex plane
     vector = np.random.random(D) * 2 * pi
@@ -34,25 +36,37 @@ def exp(D, s, t):
     complex_vector = const_complex * vector
     complex_vector = np.exp(complex_vector)
 
-    drifting_vector = np.random.normal(0, 1, size=D) * 2 * pi
-    # drifting_vector = np.random.random(D) * 2 * pi
-
     decay = gaussian_decay(t, s)
-
-    drifted_vector = (vector * decay) + (drifting_vector * (1 - decay))
-
-    complex_vector_drift = const_complex * drifted_vector
-    complex_vector_drift = np.exp(complex_vector_drift)
-
-    return complex_cosine_similarity(complex_vector, complex_vector_drift)
+    new_vector = vector.copy()
 
 
-D = 1000
-sigma = 20
+
+    # for i in range(t):
+        # drifting_vector = np.random.normal(0, 5, size=D) * 2 * pi
+    drifting_vector = np.random.random(D) * 2 * pi
+
+    # drift_rate = np.clip(np.abs(np.random.normal(0.8, 0.25, size=D)), 0, 1)
+    # drift_rate = drift_rate * (1 - decay)
+    # drift_reverse_rate = 1 - drift_rate
+
+    # drifted_vector = (new_vector * drift_reverse_rate) + (drifting_vector * drift_rate)
+    drifted_vector = (new_vector * decay) + (drifting_vector * (1-decay))
+    new_vector = drifted_vector
+
+    complex_vector_drift_attractor = const_complex * new_vector
+    complex_vector_drift_attractor = np.exp(complex_vector_drift_attractor)
+
+    return complex_cosine_similarity(complex_vector, complex_vector_drift_attractor)
+    # return spearmanr(complex_vector, complex_vector_drift_attractor).correlation
+    # return pearsonr(complex_vector, complex_vector_drift_attractor)[1]
+
+
+D = 250
+sigma = 5
 samples = 1000
 
 avg = []
-for t in range(0, 20):
+for t in range(-20, 20):
     dist = []
     # avg.append(gaussian_decay(t, sigma))
     for j in range(samples):
@@ -60,10 +74,20 @@ for t in range(0, 20):
     print("dist", dist)
     avg.append(np.mean(dist))
 
-# fig, ax = plt.subplots()
-plt.bar(
+fig, ax = plt.subplots(2)
+ax[0].bar(
     np.arange(len(avg)),
-    avg
+    np.imag(avg)
+    # ax=ax,
+    # kde=False,
+    # stat="density",
+    # color=[0.863, 0.1835, 0.1835, 0.5],
+    # common_norm=False
+)
+
+ax[1].bar(
+    np.arange(len(avg)),
+    np.real(avg)
     # ax=ax,
     # kde=False,
     # stat="density",
