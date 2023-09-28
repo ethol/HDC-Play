@@ -14,7 +14,7 @@ D = 1000
 s = 5
 
 # time
-t = 20
+t = 2
 
 
 def gaussian_decay(x, sigma):
