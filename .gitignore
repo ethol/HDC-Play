@@ -346,4 +346,8 @@ fabric.properties
 # idea folder, uncomment if you don't need it
 .idea
 
-data/archive/
+#Project Ignore
+CADimExpansion/data/archive/
+CADimExpansion/data/figures/
+CADimExpansion/data/exp_vec.csv
+CADimExpansion/data/exp_bundle.csv

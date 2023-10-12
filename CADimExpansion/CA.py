@@ -8,7 +8,6 @@ import numpy as np
 from scipy.optimize import minimize
 
 
-
 def optimal_threshold(expts, mean_thresh):
     def decision_stats(expts, threshold, details=False):
         # Calculate decision statistics for each experiment
@@ -47,7 +46,7 @@ def optimal_threshold(expts, mean_thresh):
         return decision_stats(expts, threshold)
 
     # Initial guess for the threshold
-    initial_threshold = 0.5
+    initial_threshold = mean_thresh
 
     # Minimize the objective function to find the threshold
     result = minimize(objective_function, initial_threshold, method='Nelder-Mead')
@@ -63,7 +62,8 @@ def optimal_threshold(expts, mean_thresh):
 
     return res
 
-def plot_hist(expts, param, thresholds=None):
+
+def plot_hist(expts, param, rule, thresholds=None):
     fig, ax = plt.subplots()
     neg = np.array([expt['neg'] for expt in expts]).flatten()
     pos = np.array([expt['pos'] for expt in expts]).flatten()
@@ -71,7 +71,7 @@ def plot_hist(expts, param, thresholds=None):
     sns.histplot(neg, ax=ax, stat="density", color=[0.863, 0.1835, 0.1835, 0.5], common_norm=False)
     sns.histplot(pos, ax=ax, stat="density", color=[0.21875, 0.5546875, 0.234375, 0.5], common_norm=False)
 
-    plt.title(f"Dimensions={param['Dimensions']}, Number of vectors={param['Vectors']},\n"
+    plt.title(f"Dimensions={param['Dimensions'] * param['steps_to_keep']}, Number of vectors={param['Vectors']},\n"
               f" Vectors in bundle={param['bundled vectors']}, trails={param['number of trials']}",
               fontdict={'fontweight': "bold"})
 
@@ -83,14 +83,18 @@ def plot_hist(expts, param, thresholds=None):
                    label=f'mid at {thresholds["mid"]["threshold"]}')
 
         ax.legend()
+    plt.savefig(f'data/figures/hist_rule_{rule}.png', bbox_inches="tight", dpi=300)
+    # plt.show()
 
-    plt.show()
 
-
-def plot_sim(m_small, m_large):
+def plot_sim(m_small, m_large, rule):
     cp_small = np.dot(m_small, m_small.T)  # Equivalent to crossprod in R
     cp_large = np.dot(m_large, m_large.T)  # Equivalent to crossprod in R
 
+    l2_small = np.linalg.norm(cp_small, ord=2)
+    l2_large = np.linalg.norm(cp_large, ord=2)
+    cp_small = cp_small / l2_small
+    cp_large = cp_large / l2_large
     # Create a DataFrame for the data
     data = {'cp_small': cp_small.flatten(), 'cp_large': cp_large.flatten()}
     df = pd.DataFrame(data)
@@ -98,29 +102,57 @@ def plot_sim(m_small, m_large):
     # Create a scatter plot
     plt.figure(figsize=(8, 6))
     sns.scatterplot(x='cp_small', y='cp_large', data=df, alpha=0.5)
-    plt.xlabel('cos in low-d space')
-    plt.ylabel('cos in high-d space')
+    plt.xlabel('dot in low-d space')
+    plt.ylabel('dot in high-d space')
     plt.title('Similarity mapping low-d -> high-d')
+    # plt.show()
+    plt.savefig(f'data/figures/sim_rule_{rule}.png', bbox_inches="tight", dpi=300)
+
+
+def plot_sim_heat(m_small, m_large):
+    size = len(m_small)
+    y = np.zeros((size, size), dtype="uint32")
+    for i in range(size):
+        for j in range(size):
+            y[i][j] = np.sum(m_small[i] != m_large[j])
+    y = 1 - y / (len(m_small[0]))
+    plt.figure(figsize=(14, 12))
+    sns.heatmap(y)
     plt.show()
 
 
-def run_expts(mem, M, K, n_trials):
+def run_expts(mem, M, K, n_trials, store=False, exp_id=0):
     expts = []
+    bundles = []
+    bundele_id = []
 
     for _ in range(n_trials):
-        j = np.random.choice(M, K, replace=False)
-        # bundle = np.zeros(len(mem[0]))
-        bundle = np.sum(mem[j], axis=0)
-        bundle = np.round(bundle/K).astype("int")
+        bundle_id_set = np.random.choice(M, K, replace=False)
+        bundle = np.sum(mem[bundle_id_set], axis=0)
+        bundle = np.round(bundle / K).astype("int")
 
         bundle = bundle.astype("uint8")
-        y = np.zeros(M, dtype="int")
+        dis = np.zeros(M, dtype="int")
         for i in range(M):
-            y[i] = np.sum(mem[i] != bundle)
-        y = 1 - y/(len(mem[0]))
-        expt = {'pos': y[j], 'neg': y[np.delete(np.arange(M), j)]}
+            dis[i] = np.sum(mem[i] != bundle)
+        dis = 1 - dis / (len(mem[0]))
+        expt = {'pos': dis[bundle_id_set], 'neg': dis[np.delete(np.arange(M), bundle_id_set)]}
         expts.append(expt)
+        if store:
+            bundles.append(bundle)
+            bundele_id.append(bundle_id_set)
 
+    if store:
+        exp_bundle = pd.read_csv('data/exp_bundle.csv')
+        id_prev_max = exp_bundle["id"].max() + 1 if not exp_bundle.empty else 0
+        for i in range(0, n_trials):
+            exp_bundle_temp = {"id": i + id_prev_max,
+                               "exp_id": exp_id,
+                               "bundle_source": '/'.join(map(str, bundele_id[i])),
+                               "bundle_vec": ''.join(bundles[i].astype("str"))}
+            exp_bundle = pd.concat([exp_bundle, pd.DataFrame.from_records(exp_bundle_temp, index=[0])],
+                                   ignore_index=True)
+        exp_bundle.to_csv("data/exp_bundle.csv", index=False)
     return expts
 
 
@@ -133,8 +165,7 @@ def make_rule(r: int):
 
 
 def run_rule(init, rule, steps, steps_to_Keep):
-    # init.astype(bool)
-    last_v = BHV.from_bitstream(init.astype(bool))
+    last_v = BHV.from_bitstring("".join(init.astype("str")))
     vs = [last_v]
 
     for i in range(steps):
@@ -142,23 +173,28 @@ def run_rule(init, rule, steps, steps_to_Keep):
     arr = np.array(vs[-steps_to_Keep:])
     get_strings = np.vectorize(lambda x: BHV.bitstring(x))
     int_arr = [int(char) for char in ''.join(get_strings(arr))]
-
     return int_arr
 
 
-def bundle_sep_CA_dimex_expt(Ds=32, M=1000, K=4, n_trials=1000, RULE=110, steps=10, steps_to_keep=4, plot=True):
-    # ms is the collection of vectors in the low-d embedding space
+def bundle_sep_CA_dimex_expt(Ds=32, M=1000, K=4, n_trials=1000, rule=110, steps=10, steps_to_keep=4, plot=True,
+                             store=True):
     if DIMENSION != Ds:
         raise NotImplementedError("BHV DIMENSION needs to match parameter dimension, set the DIMENSION inside bhv")
+    exp = pd.read_csv('data/exp.csv')
+    new_exp_id = exp["id"].max() + 1 if not exp.empty else 0
+
+    # ms is the collection of vectors in the low-d embedding space
     ms = np.random.randint(0, 2, size=(M, Ds))
 
-    rule = make_rule(RULE)
-    # rul CA and keep the last steps
-    mem = np.apply_along_axis(lambda x: run_rule(x, rule, steps, steps_to_keep), axis=1, arr=ms)
+    # Apply the CA and recover the expanded vector
+    rule_bhv_func = make_rule(rule)
+    mem = np.apply_along_axis(lambda x: run_rule(x, rule_bhv_func, steps, steps_to_keep), axis=1, arr=ms)
 
-    expts = run_expts(mem, M, K, n_trials)
+    # test bundles
+    expts = run_expts(mem, M, K, n_trials, store=store, exp_id=new_exp_id)
 
-    param = {'Dimensions': DIMENSION, 'Vectors': M, 'bundled vectors': K, 'number of trials': n_trials}
+    param = {'Dimensions': DIMENSION, 'Vectors': M, 'bundled vectors': K,
+             'number of trials': n_trials, "steps_to_keep": steps_to_keep}
 
     # Calculate signal statistics
     neg_mean = np.mean([expt['neg'] for expt in expts])
@@ -170,8 +206,40 @@ def bundle_sep_CA_dimex_expt(Ds=32, M=1000, K=4, n_trials=1000, RULE=110, steps=
     thres = optimal_threshold(expts, threshold_mean)
 
     if plot:
-        plot_hist(expts, param, thres)
-        plot_sim(ms, mem)
+        plot_hist(expts, param, rule, thres)
+        plot_sim(ms, mem, rule)
+        # plot_sim_heat(ms, mem)
+    if store:
+        exp = pd.read_csv('data/exp.csv')
+        exp_temp = {'id': new_exp_id,
+                    'dimensions_small': Ds,
+                    'dimensions_large': Ds * steps_to_keep,
+                    'steps': steps,
+                    'steps_to_keep': steps_to_keep,
+                    'rule': rule,
+                    'bundle_size': K,
+                    'n_trails': n_trials,
+                    "experiment_desc": f"concatenating previous CA expansion",
+                    'neg_mean': neg_mean,
+                    'neg_std': neg_std,
+                    'pos_mean': pos_mean,
+                    'pos_std': pos_std,
+                    'timestamp': pd.Timestamp.now()
+                    }
+        exp = pd.concat([exp, pd.DataFrame.from_records(exp_temp, index=[0])], ignore_index=True)
+        exp.to_csv("data/exp.csv", index=False)
+
+        exp_vec = pd.read_csv('data/exp_vec.csv')
+        exp_vec_max = exp_vec["id"].max() if not exp_vec.empty else 0
+        ids = np.arange(start=0, stop=M) + (exp_vec_max + 1)
+        temp_pd_vec = pd.DataFrame({
+            "id": ids,
+            "vec_before": [''.join(map(str, row)) for row in ms],
+            "vec_after": [''.join(map(str, row)) for row in mem],
+        })
+        temp_pd_vec["exp_id"] = new_exp_id
+        exp_vec = pd.concat([exp_vec, temp_pd_vec], ignore_index=True)
+        exp_vec.to_csv("data/exp_vec.csv", index=False)
 
     return {
         'param': param,
@@ -186,15 +254,14 @@ def bundle_sep_CA_dimex_expt(Ds=32, M=1000, K=4, n_trials=1000, RULE=110, steps=
     }
 
 
-result = bundle_sep_CA_dimex_expt(Ds=128, M=1000, K=5, n_trials=1000, RULE=204, steps=0, steps_to_keep=1, plot=True)
+result = bundle_sep_CA_dimex_expt(Ds=128, M=1000, K=5, n_trials=1000, rule=1,
+                                  steps=3, steps_to_keep=4, plot=False, store=False)
 print(result["param"])
 print(result["res"])
 print("Threshold", pd.DataFrame(result["threshold"]))
-
-result = bundle_sep_CA_dimex_expt(Ds=128, M=1000, K=5, n_trials=1000, RULE=74, steps=3, steps_to_keep=4, plot=True)
-print(result["param"])
-print(result["res"])
-print("Threshold", pd.DataFrame(result["threshold"]))
-
-# with open(f"rule{RULE}.pbm", 'wb') as f:
-#     Image(vs).pbm(f, binary=True)
+# for rule in range(1, 255):
+#     result = bundle_sep_CA_dimex_expt(Ds=128, M=1000, K=5, n_trials=1000, rule=rule,
+#                                       steps=3, steps_to_keep=4, plot=True, store=True)
+#     print(result["param"])
+#     print(result["res"])
+#     print("Threshold", pd.DataFrame(result["threshold"]))
