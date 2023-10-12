@@ -50,15 +50,17 @@ def exp(D, s, t):
     # drift_reverse_rate = 1 - drift_rate
 
     # drifted_vector = (new_vector * drift_reverse_rate) + (drifting_vector * drift_rate)
-    drifted_vector = (new_vector * decay) + (drifting_vector * (1-decay))
+    drifted_vector = (new_vector * decay) \
+                     # + (drifting_vector * (1-decay))
     new_vector = drifted_vector
 
     complex_vector_drift_attractor = const_complex * new_vector
     complex_vector_drift_attractor = np.exp(complex_vector_drift_attractor)
 
     return complex_cosine_similarity(complex_vector, complex_vector_drift_attractor)
+    # return spatial.distance.cosine(complex_vector, complex_vector_drift_attractor)
     # return spearmanr(complex_vector, complex_vector_drift_attractor).correlation
-    # return pearsonr(complex_vector, complex_vector_drift_attractor)[1]
+    # return pearsonr(complex_vector, complex_vector_drift_attractor)[0]
 
 
 D = 250
@@ -66,6 +68,9 @@ sigma = 5
 samples = 1000
 
 avg = []
+
+
+# Intrepid the angel as a spike
 for t in range(-20, 20):
     dist = []
     # avg.append(gaussian_decay(t, sigma))
@@ -73,8 +78,12 @@ for t in range(-20, 20):
         dist.append(exp(D, sigma, t))
     print("dist", dist)
     avg.append(np.mean(dist))
+#
+# angles_radians = [cmath.phase(z) for z in avg]
+# angles_degrees = [angle * 180 / cmath.pi for angle in angles_radians]
+# print(angles_degrees)
 
-fig, ax = plt.subplots(2)
+fig, ax = plt.subplots(3)
 ax[0].bar(
     np.arange(len(avg)),
     np.imag(avg)
@@ -88,6 +97,16 @@ ax[0].bar(
 ax[1].bar(
     np.arange(len(avg)),
     np.real(avg)
+    # ax=ax,
+    # kde=False,
+    # stat="density",
+    # color=[0.863, 0.1835, 0.1835, 0.5],
+    # common_norm=False
+)
+
+ax[2].bar(
+    np.arange(len(avg)),
+    np.sum([np.real(avg), np.imag(avg)], axis=0)
     # ax=ax,
     # kde=False,
     # stat="density",

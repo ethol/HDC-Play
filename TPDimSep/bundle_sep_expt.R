@@ -88,8 +88,10 @@ bundle_sep_lin_dimex_expt <- function(
     layout = NULL,
     plot_ = NULL)
 {
-  # X is a matrix to transform from ns to n: [K x ns] [ns x n] -> [K x n]
-  X <- svd(matrix(rnorm(n * ns, sd=sqrt(1/n)), nrow=n))$u
+  # X is a matrix to transform from ns to n: [K x ns] [ns x n] -> [K x n]  not (Ns x n)?
+  Mat <- matrix(rnorm(n * ns, sd=sqrt(1/n)), nrow=n)
+  Y <- svd(Mat)
+  X <- Y$u
   # ms is the collection of vectors in the low-d embedding space
   ms <- apply(matrix(rnorm(M * ns), ncol=M, dimnames=list(NULL, paste0('v', seq(M)))), 2, z)
   # mem is the collection of vectors in the high-d space
@@ -124,10 +126,12 @@ bundle_sep_nonlin_dimex1_expt <- function(
   ms <- apply(matrix(rnorm(M * ns), ncol=M, dimnames=list(NULL, paste0('v', seq(M)))), 2, z)
   collapse_idx <- sample(rep(seq(len=n), length=ns^order))
   dimexp <- function(x) {
-    y <- c(outer(x, x))
+    ou = outer(x,x)
+    y <- c(ou)
     for (j in seq(len=order-2))
       y <- c(outer(x, y))
-    return(tapply(y, collapse_idx, sum))
+    formatted = tapply(y, collapse_idx, sum)
+    return(formatted)
   }
   mem <- apply(ms, 2, function(x) z(dimexp(x)))
   expts <- run_expts(mem, M, K, n_trials)
@@ -309,3 +313,5 @@ plot_bundle_sep_expt <- function(
   }
   return(invisible(NULL))
 }
+
+bundle_sep_nonlin_dimex1_expt()
