@@ -1,6 +1,5 @@
-from bhv.symbolic import SymbolicBHV, Var
-from bhv.vanilla import VanillaBHV as BHV, DIMENSION
-from bhv.visualization import Image
+from bhv.vanilla import DIMENSION
+import CA.CA as CABHV
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -156,24 +155,6 @@ def run_expts(mem, M, K, n_trials, store=False, exp_id=0):
     return expts
 
 
-def make_rule(r: int):
-    mask = [b == '1' for b in reversed(bin(r)[2:].rjust(8, "0"))]
-    formula = SymbolicBHV.synth([Var("left"), Var("center"), Var("right")], mask)
-    formula = formula.simplify()
-    print("formula:", formula.show())
-    return lambda x: formula.execute(vars={"left": x.roll_bits(1), "center": x, "right": x.roll_bits(-1)})
-
-
-def run_rule(init, rule, steps, steps_to_Keep):
-    last_v = BHV.from_bitstring("".join(init.astype("str")))
-    vs = [last_v]
-
-    for i in range(steps):
-        vs.append(rule(vs[-1]))
-    arr = np.array(vs[-steps_to_Keep:])
-    get_strings = np.vectorize(lambda x: BHV.bitstring(x))
-    int_arr = [int(char) for char in ''.join(get_strings(arr))]
-    return int_arr
 
 
 def bundle_sep_CA_dimex_expt(Ds=32, M=1000, K=4, n_trials=1000, rule=110, steps=10, steps_to_keep=4, plot=True,
@@ -187,8 +168,8 @@ def bundle_sep_CA_dimex_expt(Ds=32, M=1000, K=4, n_trials=1000, rule=110, steps=
     ms = np.random.randint(0, 2, size=(M, Ds))
 
     # Apply the CA and recover the expanded vector
-    rule_bhv_func = make_rule(rule)
-    mem = np.apply_along_axis(lambda x: run_rule(x, rule_bhv_func, steps, steps_to_keep), axis=1, arr=ms)
+    rule_bhv_func = CABHV.make_rule(rule)
+    mem = np.apply_along_axis(lambda x: CABHV.run_rule(x, rule_bhv_func, steps, steps_to_keep), axis=1, arr=ms)
 
     # test bundles
     expts = run_expts(mem, M, K, n_trials, store=store, exp_id=new_exp_id)
@@ -254,8 +235,8 @@ def bundle_sep_CA_dimex_expt(Ds=32, M=1000, K=4, n_trials=1000, rule=110, steps=
     }
 
 
-result = bundle_sep_CA_dimex_expt(Ds=128, M=1000, K=5, n_trials=1000, rule=1,
-                                  steps=3, steps_to_keep=4, plot=False, store=False)
+result = bundle_sep_CA_dimex_expt(Ds=128, M=1000, K=5, n_trials=1000, rule=90,
+                                  steps=3, steps_to_keep=4, plot=True, store=False)
 print(result["param"])
 print(result["res"])
 print("Threshold", pd.DataFrame(result["threshold"]))
