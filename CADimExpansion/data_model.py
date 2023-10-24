@@ -2,7 +2,7 @@ import pandas as pd
 
 exp = pd.DataFrame({}, columns=["id", "dimensions_small", "dimensions_large", "steps", "steps_to_keep", "rule",
                                 "bundle_size", "n_trails", "experiment_desc",
-                                "neg_mean", "neg_std",  "pos_mean", "pos_std", "timestamp"])
+                                "neg_mean", "neg_std", "pos_mean", "pos_std", "timestamp"])
 exp = exp.astype(
     {'id': 'int',
      'dimensions_small': 'int',
@@ -38,6 +38,21 @@ exp_bundle = exp_bundle.astype(
      'bundle_vec': 'str'
      }
 )
+
+exp_ml = pd.DataFrame({}, columns=["rule", "baseline", "difference_base", "seed", "benchmark", "classifier"])
+exp_ml = exp_ml.astype(
+    {
+        'rule': 'int',
+        'baseline': 'float',
+        'difference_base': 'float',
+        'seed': 'int',
+        'benchmark': 'str',
+        'classifier': 'str'
+    }
+)
+
 # exp.to_csv("data/exp.csv", index=False)
 # exp_vec.to_csv("data/exp_vec.csv", index=False)
 # exp_bundle.to_csv("data/exp_bundle.csv", index=False)
+
+# exp_ml.to_csv("data/exp_ml.csv", index=False)
