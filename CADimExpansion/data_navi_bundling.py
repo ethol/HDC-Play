@@ -10,7 +10,7 @@ exp["neg_z"] = exp.apply(lambda x: x["neg_mean"] / x["neg_std"], axis=1)
 exp["pos_z"] = exp.apply(lambda x: x["pos_mean"] / x["pos_std"], axis=1)
 exp["sep_z"] = exp.apply(lambda x: (x["pos_mean"] - x["neg_mean"]) / np.sqrt(x["neg_std"] ** 2 + x["pos_std"] ** 2),
                          axis=1)
-exp = exp.sort_values(by=['sep_z'], ascending=False)
+# exp = exp.sort_values(by=['sep_z'], ascending=False)
 
 exp = exp.drop(["pos_z", "neg_z"], axis=1)
 
@@ -30,7 +30,13 @@ ca_class_3 = [18, 22, 30, 45, 60, 90, 105, 122, 126, 146, 150]
 
 ca_class_4 = [41, 54, 106, 110]
 
-exp = exp[exp["rule"].isin(ca_min_eq)]
-# exp = exp[exp['sep_z'] > 3.1]
+# exp = exp[exp["rule"].isin(ca_min_eq)]
+exp = exp[exp['sep_z'] > 3.3]
 
-print(exp.head(50))
+# print(exp.head(50))
+
+print(exp.loc[0:50])
+print(exp.loc[50:100])
+print(exp.loc[100:150])
+print(exp.loc[150:200])
+print(exp.loc[200:250])
