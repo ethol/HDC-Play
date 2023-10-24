@@ -20,12 +20,16 @@ def train(data_t, labels_t):
 
 
 def asses(bundles, data_t, labels_t):
-    corr = 0
-    for i in range(len(labels_t)):
-        hemming = np.sum(data_t[i] == bundles, axis=1)
-        if labels_t[i] == np.argmax(hemming):
-            corr += 1
-    return corr / len(labels_t)
+    hamming_distances = np.sum(data_t == bundles[:, np.newaxis], axis=2)
+
+    # Find the class with the highest Hamming distance for each sample
+    predicted_labels = np.argmax(hamming_distances, axis=0)
+
+    # Calculate the accuracy
+    correct_predictions = np.sum(predicted_labels == labels_t)
+    accuracy = correct_predictions / len(labels_t)
+
+    return accuracy
 
 
 start = time.time()
