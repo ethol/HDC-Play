@@ -1,5 +1,5 @@
 from bhv.symbolic import SymbolicBHV, Var
-from bhv.vanilla import VanillaBHV as BHV
+from bhv.vanilla import VanillaBHV as BHV, DIMENSION
 import numpy as np
 
 def make_rule(r: int):
@@ -11,6 +11,10 @@ def make_rule(r: int):
 
 
 def run_rule(init, rule, steps, steps_to_Keep):
+
+    if DIMENSION != len(init):
+        raise NotImplementedError("BHV DIMENSION needs to match parameter dimension, set the DIMENSION inside bhv")
+
     last_v = BHV.from_bitstring("".join(init.astype("str")))
     vs = [last_v]
 
