@@ -1,28 +1,16 @@
-import tensorflow as tf
-import numpy as np
 from sklearn.model_selection import train_test_split
-from sklearn.svm import SVC
 import CA.CA as BHVCA
+import Benchmark.Benchmarks as BM
 import time
 import pandas as pd
+import numpy as np
 from libsvm.svmutil import *
 
 start = time.time()
 
 # Load the full MNIST dataset
-mnist = tf.keras.datasets.mnist
-(X_train, y_train), (X_test, y_test) = mnist.load_data()
 
-data = np.concatenate((X_train, X_test), axis=0)
-labels = np.concatenate((y_train, y_test), axis=0)
-
-data_bool = np.round(data / 255).astype("uint8")
-data_bool = data_bool.reshape(data_bool.shape[0], -1)
-print(data_bool.shape)
-
-# holdout 33 % of the data for later.
-data_bool, data_holdout, labels, labels_holdout = train_test_split(
-    data_bool, labels, test_size=0.33, random_state=42)
+data_bool, labels = BM.load_binary_mnist()
 
 ME = [
     # 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11,

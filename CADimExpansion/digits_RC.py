@@ -1,4 +1,3 @@
-from sklearn import datasets, metrics, svm
 from sklearn.model_selection import train_test_split
 from scipy import spatial
 import time
@@ -6,6 +5,7 @@ import numpy as np
 import seaborn as sns
 import matplotlib.pylab as plt
 import CA.CA as BHVCA
+import Benchmark.Benchmarks as BM
 from sklearn.svm import SVC
 import pandas as pd
 
@@ -63,15 +63,7 @@ def heat(data, targets):
 
 start = time.time()
 
-digits = datasets.load_digits()
-
-# targets = digits.target[:100]
-targets = digits.target
-# data = digits.data[:100]
-data = digits.data
-high = np.max(data)
-
-data_bool = np.round(data / high).astype("uint8")
+data_bool, labels = BM.load_binary_digits()
 
 ME = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 18, 19, 22, 23, 24, 25, 26, 27, 28, 29, 30, 32, 33,
       34, 35, 36, 37, 38, 40, 41, 42, 43, 44, 45, 46, 50, 51, 54, 56, 57, 58, 60, 62, 72, 73, 74, 76, 77, 78, 90,

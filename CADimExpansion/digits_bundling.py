@@ -6,6 +6,7 @@ import numpy as np
 import seaborn as sns
 import matplotlib.pylab as plt
 import CA.CA as BHVCA
+import Benchmark.Benchmarks as BM
 from sklearn.svm import SVC
 import pandas as pd
 import tensorflow as tf
@@ -35,13 +36,7 @@ def asses(bundles, data_t, labels_t):
 
 start = time.time()
 
-digits = datasets.load_digits()
-
-labels = digits.target
-data = digits.data
-high = np.max(data)
-
-data_bool = np.round(data / high).astype("uint8")
+data_bool, labels = BM.load_binary_digits()
 
 exp_df = pd.read_csv('data/exp_ml.csv')
 
