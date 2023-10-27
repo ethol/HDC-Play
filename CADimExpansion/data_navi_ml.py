@@ -30,13 +30,19 @@ def bonferroni_t_test(x):
         return "Not Significant"
 
 
-# exp = exp[exp["benchmark"] == "MNIST"]
-exp = exp[exp["benchmark"] == "digits"]
-# exp = exp[exp["classifier"] == "SVM Linear"]
-exp = exp[exp["classifier"] == "Bundle simple"]
+# exp = exp[(exp["benchmark"] == "MNIST Original split") & (exp["classifier"] == "Bundle simple")]
+# exp = exp[(exp["benchmark"] == "MNIST") & (exp["classifier"] == "Bundle simple")]
+# exp = exp[(exp["benchmark"] == "MNIST") & (exp["classifier"] == "SVM Linear")]
+exp = exp[(exp["benchmark"] == "MNIST") & (exp["classifier"] == "SVM RBF 10% test")]
+# exp = exp[(exp["benchmark"] == "digits") & (exp["classifier"] == "Bundle simple")]
+# exp = exp[(exp["benchmark"] == "digits") & (exp["classifier"] == "SVM Linear")]
 
 
 print(exp.describe())
+#
+# baselines = exp["seed"].unique()
+# print(baselines)
+# exp = exp[exp["seed"] == 1630762881]
 
 aggr = exp.groupby('rule').agg({'difference_base': ['mean', 'count', 'std',
                                                     np.max, np.min,
