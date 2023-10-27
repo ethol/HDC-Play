@@ -45,7 +45,6 @@ ME = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 18, 19, 22, 23, 24, 25,
 
 
 for i in range(100):
-    scores = []
     seed = np.random.randint(np.iinfo(np.int32).max)
 
     data_train_base, data_test_base, labels_train_base, labels_test_base = train_test_split(
@@ -57,6 +56,7 @@ for i in range(100):
     print("scored", time.time() - start)
     print("base", score_base)
     for ru in ME:
+        print("starting Rule ", ru)
         data_expanded = []
         rule = BHVCA.make_rule(ru)
         i = 0
@@ -78,17 +78,14 @@ for i in range(100):
         print("scored", time.time() - start)
         print("expanded:", score_exp)
         print("improved:", score_exp - score_base)
-        scores.append((ru, score_exp - score_base))
 
-    temp_exp = pd.DataFrame(scores, columns=['rule', 'difference_base'])
-    temp_exp["seed"] = seed
-    temp_exp["baseline"] = score_base
-    temp_exp["benchmark"] = "MNIST"
-    temp_exp["classifier"] = "Bundle simple"
+        temp_exp = pd.DataFrame.from_records({'rule': ru, 'difference_base': score_exp - score_base}, index=[0])
+        temp_exp["seed"] = seed
+        temp_exp["baseline"] = score_base
+        temp_exp["benchmark"] = "MNIST"
+        temp_exp["classifier"] = "Bundle simple"
 
-    print(temp_exp.head())
-    scores.sort(reverse=True, key=lambda x: x[1])
-    print(scores)
+        print(temp_exp.head())
 
-    exp_df = pd.concat([exp_df, temp_exp], ignore_index=True)
-    exp_df.to_csv("data/exp_ml.csv", index=False)
+        exp_df = pd.concat([exp_df, temp_exp], ignore_index=True)
+        exp_df.to_csv("data/exp_ml.csv", index=False)
