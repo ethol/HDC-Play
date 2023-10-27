@@ -3,6 +3,17 @@ from sklearn import datasets
 import tensorflow as tf
 from sklearn.model_selection import train_test_split
 
+def load_binary_mnist_original_split():
+    mnist = tf.keras.datasets.mnist
+
+    (x_train, y_train), (x_test, y_test) = mnist.load_data()
+
+    data_bool_train = np.round(x_train / 255).astype("uint8")
+    x_train = data_bool_train.reshape(data_bool_train.shape[0], -1)
+
+    data_bool_test = np.round(x_test / 255).astype("uint8")
+    x_test = data_bool_test.reshape(data_bool_test.shape[0], -1)
+    return x_train, y_train, x_test, y_test
 
 def load_binary_mnist():
     mnist = tf.keras.datasets.mnist
