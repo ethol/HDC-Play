@@ -39,7 +39,8 @@ exp_bundle = exp_bundle.astype(
      }
 )
 
-exp_ml = pd.DataFrame({}, columns=["rule", "baseline", "difference_base", "seed", "benchmark", "classifier"])
+exp_ml = pd.DataFrame({}, columns=["rule", "baseline", "difference_base", "seed", "benchmark", "classifier", 'steps',
+                                   'keep', 'split_training'])
 exp_ml = exp_ml.astype(
     {
         'rule': 'int',
@@ -47,7 +48,10 @@ exp_ml = exp_ml.astype(
         'difference_base': 'float',
         'seed': 'int',
         'benchmark': 'str',
-        'classifier': 'str'
+        'classifier': 'str',
+        'steps': "int",
+        'keep': "int",
+        'split_training': "float"
     }
 )
 
@@ -56,3 +60,13 @@ exp_ml = exp_ml.astype(
 # exp_bundle.to_csv("data/exp_bundle.csv", index=False)
 
 # exp_ml.to_csv("data/exp_ml.csv", index=False)
+
+
+# exp_df = pd.read_csv('data/exp_ml.csv')
+#
+# exp_df["split_training"] = 0.10
+# exp_df.loc[exp_df.classifier == "SVM RBF 10% test", "split_training"] = 0.9
+# exp_df.loc[exp_df.benchmark == "digits", "split_training"] = 0.67
+# exp_df.loc[exp_df.benchmark == "MNIST Original split", "split_training"] = 0.90
+#
+# exp_df.to_csv("data/exp_ml.csv", index=False)

@@ -29,11 +29,11 @@ def bonferroni_t_test(x):
     else:
         return "Not Significant"
 
-
 # exp = exp[(exp["benchmark"] == "MNIST Original split") & (exp["classifier"] == "Bundle simple")]
 # exp = exp[(exp["benchmark"] == "MNIST") & (exp["classifier"] == "Bundle simple")]
 # exp = exp[(exp["benchmark"] == "MNIST") & (exp["classifier"] == "SVM Linear")]
-exp = exp[(exp["benchmark"] == "MNIST") & (exp["classifier"] == "SVM RBF 10% test")]
+# exp = exp[(exp["benchmark"] == "MNIST") & (exp["classifier"] == "SVM RBF")]
+exp = exp[(exp["benchmark"] == "MNIST") & (exp["classifier"] == "NN linear epochs 20")]
 # exp = exp[(exp["benchmark"] == "digits") & (exp["classifier"] == "Bundle simple")]
 # exp = exp[(exp["benchmark"] == "digits") & (exp["classifier"] == "SVM Linear")]
 
@@ -45,12 +45,20 @@ print(exp.describe())
 # exp = exp[exp["seed"] == 1630762881]
 
 aggr = exp.groupby('rule').agg({'difference_base': ['mean', 'count', 'std',
-                                                    np.max, np.min,
+                                                    'max', 'min',
                                                     t_test, bonferroni_t_test
-                                                    ]})
-aggr.columns = ['Average', 'Count', 'Stdev',
+                                                    ],
+                                'baseline': ['mean']
+                                })
+aggr.columns = ['Average_delta', 'Count', 'Stdev',
                 'Max', 'Min',
-                'T_Test', "bonferroni_t_test"
+                'T_Test', "bonferroni_t_test", "baseline"
                 ]
-aggr = aggr.sort_values(by=['Average'], ascending=False)
+aggr["Avg_Acc"] = aggr["baseline"] + aggr["Average_delta"]
+
+desired_order = ['Avg_Acc', 'Average_delta', 'Count', 'Stdev',
+                 'Max', 'Min',
+                 'T_Test', "bonferroni_t_test"]
+aggr = aggr[desired_order]
+aggr = aggr.sort_values(by=['Average_delta'], ascending=False)
 print(aggr)

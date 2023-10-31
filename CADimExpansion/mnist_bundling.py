@@ -43,12 +43,16 @@ ME = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 18, 19, 22, 23, 24, 25,
       94, 104, 105, 106, 108, 110, 122, 126, 128, 130, 132, 134, 136, 138, 140, 142, 146, 150, 152, 154, 156,
       160, 162, 164, 168, 170, 172, 178, 184, 200, 204, 232, ]
 
+split_training = 0.90
+steps = 3
+keep = 4
+
 
 for i in range(100):
     seed = np.random.randint(np.iinfo(np.int32).max)
 
     data_train_base, data_test_base, labels_train_base, labels_test_base = train_test_split(
-        data_bool, labels, test_size=0.90, random_state=seed)
+        data_bool, labels, test_size=1 - split_training, random_state=seed)
 
     bundles = train(data_train_base, labels_train_base)
     score_base = asses(bundles, data_test_base, labels_test_base)
@@ -57,20 +61,10 @@ for i in range(100):
     print("base", score_base)
     for ru in ME:
         print("starting Rule ", ru)
-        data_expanded = []
-        rule = BHVCA.make_rule(ru)
-        i = 0
-        for d in data_bool:
-            exp = BHVCA.run_rule(d, rule, 3, 4)
-            data_expanded.append(exp)
-            i += 1
-            if i % 1000 == 0:
-                print(i / len(labels), time.time() - start)
-
-        data_expanded = np.array(data_expanded)
+        data_expanded = BHVCA.expand(data_bool, ru, steps, keep, vocal=False)
 
         data_train, data_test, labels_train, labels_test = train_test_split(
-                data_expanded, labels, test_size=0.90, random_state=seed)
+                data_expanded, labels, test_size=1 - split_training, random_state=seed)
 
         bundles = train(data_train, labels_train)
         score_exp = asses(bundles, data_test, labels_test)
@@ -84,6 +78,9 @@ for i in range(100):
         temp_exp["baseline"] = score_base
         temp_exp["benchmark"] = "MNIST"
         temp_exp["classifier"] = "Bundle simple"
+        temp_exp["split_training"] = split_training
+        temp_exp["steps"] = steps
+        temp_exp["keep"] = keep
 
         print(temp_exp.head())
 
