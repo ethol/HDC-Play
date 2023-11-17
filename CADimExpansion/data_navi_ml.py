@@ -1,6 +1,7 @@
 import pandas as pd
 import scipy.stats as stats
 import numpy as np
+import Graphics.Graphics as GX
 
 # exp = pd.read_csv('data/exp_RC_dig.csv')
 # exp = pd.read_csv('data/exp_RC_mnist.csv')
@@ -29,27 +30,31 @@ def bonferroni_t_test(x):
     else:
         return "Not Significant"
 
+
 # exp = exp[(exp["benchmark"] == "MNIST Original split") & (exp["classifier"] == "Bundle simple")]
 # exp = exp[(exp["benchmark"] == "MNIST") & (exp["classifier"] == "Bundle simple")]
-# exp = exp[(exp["benchmark"] == "MNIST") & (exp["classifier"] == "SVM Linear")]
+exp = exp[(exp["benchmark"] == "MNIST") & (exp["classifier"] == "SVM Linear")]
 # exp = exp[(exp["benchmark"] == "MNIST") & (exp["classifier"] == "SVM RBF")]
-exp = exp[(exp["benchmark"] == "MNIST") & (exp["classifier"] == "NN linear epochs 20")]
+# exp = exp[(exp["benchmark"] == "MNIST") & (exp["classifier"] == "NN linear epochs 20")]
+# exp = exp[(exp["benchmark"] == "MNIST") & (exp["classifier"] == "NN large epochs 100")]
+# exp = exp[(exp["benchmark"] == "MNIST") & (exp["classifier"] == "KNN n=5")]
 # exp = exp[(exp["benchmark"] == "digits") & (exp["classifier"] == "Bundle simple")]
 # exp = exp[(exp["benchmark"] == "digits") & (exp["classifier"] == "SVM Linear")]
 
 
 print(exp.describe())
-#
+# exp = exp[(exp["steps"] == 3) & (exp["keep"] == 4)]
+exp = exp[exp["split_training"] == 0.90]
 # baselines = exp["seed"].unique()
 # print(baselines)
 # exp = exp[exp["seed"] == 1630762881]
 
-aggr = exp.groupby('rule').agg({'difference_base': ['mean', 'count', 'std',
-                                                    'max', 'min',
-                                                    t_test, bonferroni_t_test
-                                                    ],
-                                'baseline': ['mean']
-                                })
+aggr = exp.groupby(['rule', 'steps', 'keep']).agg({'difference_base': ['mean', 'count', 'std',
+                                                                       'max', 'min',
+                                                                       t_test, bonferroni_t_test
+                                                                       ],
+                                                   'baseline': ['mean']
+                                                   })
 aggr.columns = ['Average_delta', 'Count', 'Stdev',
                 'Max', 'Min',
                 'T_Test', "bonferroni_t_test", "baseline"
@@ -59,6 +64,10 @@ aggr["Avg_Acc"] = aggr["baseline"] + aggr["Average_delta"]
 desired_order = ['Avg_Acc', 'Average_delta', 'Count', 'Stdev',
                  'Max', 'Min',
                  'T_Test', "bonferroni_t_test"]
+
 aggr = aggr[desired_order]
 aggr = aggr.sort_values(by=['Average_delta'], ascending=False)
+
 print(aggr)
+
+GX.createBarOfPandasMD(aggr.reset_index(), baseline=exp["baseline"].mean())

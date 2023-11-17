@@ -14,13 +14,13 @@ def create_model(input_size):
     # Build a simple neural network
     model = tf.keras.models.Sequential([
         tf.keras.layers.Flatten(input_shape=(input_size,)),  # Flattened input shape
-        # # tf.keras.layers.Dropout(0.5),
+        # tf.keras.layers.Dropout(0.5),
         # tf.keras.layers.Dense(512, activation="relu"),
         # # tf.keras.layers.Dropout(0.5),
         # tf.keras.layers.Dense(256, activation="relu"),
         # # tf.keras.layers.Dropout(0.5),
         # tf.keras.layers.Dense(128, activation="relu"),
-        # # tf.keras.layers.Dropout(0.5),
+        # tf.keras.layers.Dropout(0.5),
         tf.keras.layers.Dense(10, activation='softmax')  # Output layer with 10 units for 10 digits
     ])
 
@@ -32,7 +32,7 @@ def create_model(input_size):
 
 
 # Load the MNIST dataset
-data_bool, labels = BM.load_binary_mnist()
+data_bool, labels = BM.load_binary_mnist_similarity_preserved()
 
 split_training = 0.90
 steps = 3
@@ -45,7 +45,7 @@ for i in range(100):
     data_train, data_test, labels_train, labels_test = train_test_split(
         data_bool, labels, test_size=1 - split_training, random_state=seed)
 
-    base_model = create_model(784)
+    base_model = create_model(len(data_bool[0]))
     # Train the model
     base_model.fit(data_train, labels_train, epochs=epochs)
 
@@ -53,12 +53,12 @@ for i in range(100):
     test_loss, score_base = base_model.evaluate(data_test, labels_test)
     print(f'Test accuracy base: {score_base}')
 
-    data_expanded = BHVCA.expand(data_bool, rule, steps, keep, vocal=False)
+    data_expanded = BHVCA.expand(data_bool, rule, steps, keep, vocal=True)
 
     data_train, data_test, labels_train, labels_test = train_test_split(
         data_expanded, labels, test_size=1 - split_training, random_state=seed)
 
-    model = create_model((784*keep))
+    model = create_model(len(data_expanded[0]))
     model.fit(data_train, labels_train, epochs=epochs)
 
     test_loss, score_exp = model.evaluate(data_test, labels_test)

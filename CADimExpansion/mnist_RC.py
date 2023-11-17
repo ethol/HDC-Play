@@ -10,20 +10,25 @@ start = time.time()
 
 # Load the full MNIST dataset
 
-data_bool, labels = BM.load_binary_mnist()
+data_bool, labels = BM.load_binary_mnist_rounded()
 
 ME = [
-    # 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11,
+
+
+    # 1, 2, 3, 4, 5,
+    # 6, 7, 8, 9, 10, 11,
     # 12, 13, 14, 15, 18, 19, 22, 23, 24, 25, 26, 27, 28, 29, 30, 32, 33,
     # 34, 35, 36,
-    # 37, 38, 40, 41, 42, 43, 44, 45, 46, 50, 51, 54, 56, 57,
-    # 58,
-    # 60, 62, 72, 73, 74, 76, 77, 78, 90,
-    # 94, 104, 105, 106, 108, 110, 122,
-    # 126,
-    # 128, 130, 132, 134, 136, 138, 140, 142, 146, 150, 152, 154, 156,
-    # 160, 162, 164, 168, 170, 172, 178, 184, 200, 204, 232,
-    94, 126,
+    # 37, 38, 40, 41, 42, 43, 44, 45, 46, 50, 51, 54, 56,
+    57,
+    58,
+    # 60,
+    62, 72, 73, 74, 76, 77, 78, 90,
+    94, 104,
+    105, 106, 108, 110, 122,
+    126,
+    128, 130, 132, 134, 136, 138, 140, 142, 146, 150, 152, 154, 156,
+    160, 162, 164, 168, 170, 172, 178, 184, 200, 204, 232,
 ]
 
 split_training = 0.90
@@ -32,7 +37,6 @@ keep = 4
 
 
 exp_df = pd.read_csv('data/exp_ml.csv')
-
 scores = []
 seed = np.random.randint(np.iinfo(np.int32).max)
 data_train, data_test, labels_train, labels_test = train_test_split(
@@ -70,7 +74,7 @@ for ru in ME:
     temp_exp["seed"] = seed
     temp_exp["baseline"] = score_base
     temp_exp["benchmark"] = "MNIST"
-    temp_exp["classifier"] = "SVM RBF 10% test"
+    temp_exp["classifier"] = "SVM RBF"
     temp_exp["split_training"] = split_training
     temp_exp["steps"] = steps
     temp_exp["keep"] = keep

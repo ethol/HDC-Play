@@ -9,7 +9,7 @@ from libsvm.svmutil import *
 start = time.time()
 
 
-data_bool, labels = BM.load_binary_mnist()
+data_bool, labels = BM.load_binary_mnist_rounded()
 
 data_train, data_test, labels_train, labels_test = train_test_split(
     data_bool, labels, test_size=0.90, random_state=1630762881)

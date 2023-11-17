@@ -34,7 +34,7 @@ def asses(bundles, data_t, labels_t):
 
 start = time.time()
 
-data_bool, labels = BM.load_binary_mnist()
+data_bool, labels = BM.load_binary_mnist_rounded()
 
 exp_df = pd.read_csv('data/exp_ml.csv')
 

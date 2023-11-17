@@ -2,6 +2,7 @@ import time
 
 from bhv.symbolic import SymbolicBHV, Var
 from bhv.vanilla import VanillaBHV as BHV, DIMENSION
+import bhv.shared as sh
 import numpy as np
 
 
@@ -14,8 +15,11 @@ def make_rule(r: int):
 
 
 def run_rule(init, rule, steps, steps_to_Keep):
+
+
     if DIMENSION != len(init):
-        raise NotImplementedError("BHV DIMENSION needs to match parameter dimension, set the DIMENSION inside bhv")
+        # print("change dimension")
+        raise NotImplementedError(f"BHV DIMENSION needs to match parameter dimension, set the DIMENSION inside bhv, BHV dim: {DIMENSION} vs CA dim: {len(init)}")
 
     last_v = BHV.from_bitstring("".join(init.astype("str")))
     vs = [last_v]
@@ -24,7 +28,7 @@ def run_rule(init, rule, steps, steps_to_Keep):
         vs.append(rule(vs[-1]))
     arr = np.array(vs[-steps_to_Keep:])
     get_strings = np.vectorize(lambda x: BHV.bitstring(x))
-    int_arr = [int(char) for char in ''.join(get_strings(arr))]
+    int_arr = np.array(list(''.join(get_strings(arr))), dtype=np.uint8)
     return int_arr
 
 
